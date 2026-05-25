@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
 <meta charset="UTF-8">
-<title>Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Google Sheet Dashboard</title>
 
 <style>
 
 body{
-font-family:Segoe UI;
-background:#f5f7fb;
+margin:0;
 padding:30px;
+background:#f5f7fb;
+font-family:Arial;
 }
 
 .card{
 background:#fff;
-padding:20px;
-border-radius:16px;
+padding:24px;
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,.08);
 }
 
 table{
@@ -26,13 +29,17 @@ border-collapse:collapse;
 
 th{
 background:#2563eb;
-color:#fff;
+color:white;
 padding:12px;
 }
 
 td{
 padding:10px;
 border-bottom:1px solid #eee;
+}
+
+.loading{
+padding:30px;
 }
 
 </style>
@@ -43,7 +50,11 @@ border-bottom:1px solid #eee;
 
 <div class="card">
 
-<h2>Dữ liệu Google Sheet</h2>
+<h2>📊 Google Sheet</h2>
+
+<div id="loading" class="loading">
+Đang tải...
+</div>
 
 <table id="tbl"></table>
 
@@ -51,47 +62,32 @@ border-bottom:1px solid #eee;
 
 <script>
 
-async function load(){
+const SHEET =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTk1CRFRmD-uRKJuGAGi3RCkd5wf-hcj77Tyy4isvHWAMb749HZSfHVIBzepVRKrTMDWM1tyTcBMTwE/pub?output=csv";
 
-const url =
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vTk1CRFRmD-uRKJuGAGi3RCkd5wf-hcj77Tyy4isvHWAMb749HZSfHVIBzepVRKrTMDWM1tyTcBMTwE/gviz/tq?tqx=out:json";
+fetch(SHEET)
 
-const txt =
-await fetch(url)
-.then(r=>r.text());
+.then(r=>r.text())
 
-const json =
-JSON.parse(
-txt
-.substring(47)
-.slice(0,-2)
-);
-
-const cols =
-json.table.cols;
+.then(csv=>{
 
 const rows =
-json.table.rows;
+csv
+.split("\n")
+.map(r=>r.split(","));
 
-let html="<tr>";
+let html="";
 
-cols.forEach(c=>{
-
-html+=
-`<th>${c.label}</th>`;
-
-});
-
-html+="</tr>";
-
-rows.forEach(r=>{
+rows.forEach((row,i)=>{
 
 html+="<tr>";
 
-r.c.forEach(c=>{
+row.forEach(cell=>{
 
 html+=
-`<td>${c?.v ?? ""}</td>`;
+i===0
+? `<th>${cell}</th>`
+: `<td>${cell}</td>`;
 
 });
 
@@ -100,18 +96,29 @@ html+="</tr>";
 });
 
 document
-.getElementById(
-"tbl"
-)
+.getElementById("tbl")
 .innerHTML =
 html;
 
-}
+document
+.getElementById("loading")
+.remove();
 
-load();
+})
+
+.catch(e=>{
+
+document
+.getElementById(
+"loading"
+).innerHTML =
+"❌ Không tải được dữ liệu";
+
+console.log(e);
+
+});
 
 </script>
 
 </body>
-
 </html>
