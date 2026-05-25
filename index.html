@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#f5f7fb;
+padding:30px;
+}
+
+.card{
+background:#fff;
+padding:20px;
+border-radius:16px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th{
+background:#2563eb;
+color:#fff;
+padding:12px;
+}
+
+td{
+padding:10px;
+border-bottom:1px solid #eee;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Dữ liệu Google Sheet</h2>
+
+<table id="tbl"></table>
+
+</div>
+
+<script>
+
+async function load(){
+
+const url =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTk1CRFRmD-uRKJuGAGi3RCkd5wf-hcj77Tyy4isvHWAMb749HZSfHVIBzepVRKrTMDWM1tyTcBMTwE/gviz/tq?tqx=out:json";
+
+const txt =
+await fetch(url)
+.then(r=>r.text());
+
+const json =
+JSON.parse(
+txt
+.substring(47)
+.slice(0,-2)
+);
+
+const cols =
+json.table.cols;
+
+const rows =
+json.table.rows;
+
+let html="<tr>";
+
+cols.forEach(c=>{
+
+html+=
+`<th>${c.label}</th>`;
+
+});
+
+html+="</tr>";
+
+rows.forEach(r=>{
+
+html+="<tr>";
+
+r.c.forEach(c=>{
+
+html+=
+`<td>${c?.v ?? ""}</td>`;
+
+});
+
+html+="</tr>";
+
+});
+
+document
+.getElementById(
+"tbl"
+)
+.innerHTML =
+html;
+
+}
+
+load();
+
+</script>
+
+</body>
+
+</html>
